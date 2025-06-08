@@ -4,6 +4,7 @@ import com.p2p.model.User;
 import com.p2p.model.Transfer;
 import com.p2p.model.TransferType;
 import com.p2p.utils.EnvLoader;
+import com.p2p.utils.PasswordUtils;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS users (
                 user_id INT AUTO_INCREMENT PRIMARY KEY,
                 username VARCHAR(50) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
+                password VARCHAR(512) NOT NULL,
                 email VARCHAR(100) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_online BOOLEAN DEFAULT FALSE,
@@ -139,8 +140,13 @@ public class DatabaseManager {
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, user.getUsername());
-            pstmt.setString(2, user.getPassword());
+
+            // Hash the password before storing
+            String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
+            pstmt.setString(2, hashedPassword);
             pstmt.setString(3, user.getEmail());
+
+            System.out.println("Registering user with hashed password");
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
@@ -158,23 +164,34 @@ public class DatabaseManager {
     }
 
     public User authenticateUser(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    User user = new User();
-                    user.setUserId(rs.getInt("user_id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPassword(rs.getString("password"));
-                    user.setEmail(rs.getString("email"));
-                    user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                    user.setOnline(rs.getBoolean("is_online"));
-                    user.setIpAddress(rs.getString("ip_address"));
-                    user.setPort(rs.getInt("port"));
-                    return user;
+                    String storedPasswordHash = rs.getString("password");
+
+                    // Verify password using PasswordUtils
+                    if (PasswordUtils.verifyPassword(password, storedPasswordHash)) {
+                        User user = new User();
+                        user.setUserId(rs.getInt("user_id"));
+                        user.setUsername(rs.getString("username"));
+                        user.setPassword(storedPasswordHash); // Keep the hashed version
+                        user.setEmail(rs.getString("email"));
+                        user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                        user.setOnline(rs.getBoolean("is_online"));
+                        user.setIpAddress(rs.getString("ip_address"));
+                        user.setPort(rs.getInt("port"));
+
+                        // If this is an old plain text password, update it to hashed version
+                        if (!PasswordUtils.isSecureHash(storedPasswordHash)) {
+                            System.out.println("Upgrading password to secure hash for user: " + username);
+                            updateUserPasswordHash(user.getUserId(), password);
+                        }
+
+                        return user;
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -302,6 +319,58 @@ public class DatabaseManager {
             System.err.println("Error getting online users: " + e.getMessage());
         }
         return users;
+    }
+
+    /**
+     * Update user password to hashed version (for upgrading existing plain text passwords)
+     */
+    private void updateUserPasswordHash(int userId, String plainTextPassword) {
+        String sql = "UPDATE users SET password = ? WHERE user_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            String hashedPassword = PasswordUtils.hashPassword(plainTextPassword);
+            pstmt.setString(1, hashedPassword);
+            pstmt.setInt(2, userId);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("Password successfully upgraded to secure hash");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error updating password hash: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Change user password (with proper hashing)
+     */
+    public boolean changeUserPassword(int userId, String oldPassword, String newPassword) {
+        // First verify the old password
+        String sql = "SELECT password FROM users WHERE user_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedPasswordHash = rs.getString("password");
+
+                    if (PasswordUtils.verifyPassword(oldPassword, storedPasswordHash)) {
+                        // Old password is correct, update to new password
+                        String updateSql = "UPDATE users SET password = ? WHERE user_id = ?";
+                        try (PreparedStatement updatePstmt = connection.prepareStatement(updateSql)) {
+                            String newHashedPassword = PasswordUtils.hashPassword(newPassword);
+                            updatePstmt.setString(1, newHashedPassword);
+                            updatePstmt.setInt(2, userId);
+
+                            int affectedRows = updatePstmt.executeUpdate();
+                            return affectedRows > 0;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error changing password: " + e.getMessage());
+        }
+        return false;
     }
 
     public void closeConnection() {

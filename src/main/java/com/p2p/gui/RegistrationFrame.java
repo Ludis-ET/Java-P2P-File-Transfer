@@ -111,11 +111,6 @@ public class RegistrationFrame extends JFrame {
             BorderFactory.createLineBorder(new Color(70, 130, 180), 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)));
 
-        JLabel requiredLabel = new JLabel("📝 Please fill out all required fields marked with *");
-        requiredLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        requiredLabel.setForeground(new Color(70, 130, 180));
-        requiredLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        instructionsPanel.add(requiredLabel, BorderLayout.CENTER);
 
         gbc.gridy = 1;
         gbc.gridwidth = 2;
@@ -157,9 +152,9 @@ public class RegistrationFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         usernameField.setToolTipText("Enter a unique username (minimum 3 characters)");
         usernameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(70, 130, 180), 2),
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)));
-        usernameField.setBackground(new Color(250, 250, 255));
+        usernameField.setBackground(Color.WHITE);
         mainPanel.add(usernameField, gbc);
 
         // Email Section
@@ -195,9 +190,9 @@ public class RegistrationFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         emailField.setToolTipText("Enter your email address (e.g., user@example.com)");
         emailField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(60, 179, 113), 2),
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)));
-        emailField.setBackground(new Color(250, 255, 250));
+        emailField.setBackground(Color.WHITE);
         mainPanel.add(emailField, gbc);
 
         // Password Section
@@ -233,9 +228,9 @@ public class RegistrationFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         passwordField.setToolTipText("Enter a secure password (minimum 6 characters)");
         passwordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(255, 140, 0), 2),
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)));
-        passwordField.setBackground(new Color(255, 250, 240));
+        passwordField.setBackground(Color.WHITE);
         mainPanel.add(passwordField, gbc);
 
         // Confirm Password Section
@@ -271,9 +266,9 @@ public class RegistrationFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         confirmPasswordField.setToolTipText("Re-enter your password to confirm it matches");
         confirmPasswordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(186, 85, 211), 2),
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)));
-        confirmPasswordField.setBackground(new Color(250, 240, 255));
+        confirmPasswordField.setBackground(Color.WHITE);
         mainPanel.add(confirmPasswordField, gbc);
 
         // Status label
@@ -443,15 +438,15 @@ public class RegistrationFrame extends JFrame {
                 String username = usernameField.getText().trim();
                 if (username.length() >= 3) {
                     usernameField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(34, 139, 34), 2),
+                        BorderFactory.createLineBorder(new Color(34, 139, 34), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else if (username.length() > 0) {
                     usernameField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(220, 20, 60), 2),
+                        BorderFactory.createLineBorder(new Color(220, 20, 60), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else {
                     usernameField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(70, 130, 180), 2),
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 }
             }
@@ -464,15 +459,15 @@ public class RegistrationFrame extends JFrame {
                 String email = emailField.getText().trim();
                 if (EMAIL_PATTERN.matcher(email).matches()) {
                     emailField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(34, 139, 34), 2),
+                        BorderFactory.createLineBorder(new Color(34, 139, 34), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else if (email.length() > 0) {
                     emailField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(220, 20, 60), 2),
+                        BorderFactory.createLineBorder(new Color(220, 20, 60), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else {
                     emailField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(60, 179, 113), 2),
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 }
             }
@@ -485,15 +480,15 @@ public class RegistrationFrame extends JFrame {
                 String password = new String(passwordField.getPassword());
                 if (password.length() >= 6) {
                     passwordField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(34, 139, 34), 2),
+                        BorderFactory.createLineBorder(new Color(34, 139, 34), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else if (password.length() > 0) {
                     passwordField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(220, 20, 60), 2),
+                        BorderFactory.createLineBorder(new Color(220, 20, 60), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else {
                     passwordField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(255, 140, 0), 2),
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 }
             }
@@ -507,15 +502,15 @@ public class RegistrationFrame extends JFrame {
                 String confirmPassword = new String(confirmPasswordField.getPassword());
                 if (confirmPassword.length() > 0 && confirmPassword.equals(password)) {
                     confirmPasswordField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(34, 139, 34), 2),
+                        BorderFactory.createLineBorder(new Color(34, 139, 34), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else if (confirmPassword.length() > 0) {
                     confirmPasswordField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(220, 20, 60), 2),
+                        BorderFactory.createLineBorder(new Color(220, 20, 60), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 } else {
                     confirmPasswordField.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(186, 85, 211), 2),
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                         BorderFactory.createEmptyBorder(8, 12, 8, 12)));
                 }
             }
