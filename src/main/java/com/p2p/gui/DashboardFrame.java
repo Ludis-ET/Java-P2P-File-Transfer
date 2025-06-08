@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
  */
 public class DashboardFrame extends JFrame {
     private User currentUser;
+    private int serverPort;
     private JLabel welcomeLabel;
     private JLabel statusLabel;
     private JTextField peerIpField;
@@ -48,8 +49,10 @@ public class DashboardFrame extends JFrame {
 
     private static final int DEFAULT_PORT = ConfigUtils.getDefaultPort();
 
-    public DashboardFrame(User user) {
+    // Constructor with custom port
+    public DashboardFrame(User user, int port) {
         this.currentUser = user;
+        this.serverPort = port;
         this.executorService = Executors.newCachedThreadPool();
 
         initializeComponents();
@@ -58,7 +61,7 @@ public class DashboardFrame extends JFrame {
         loadTransferHistory();
         startFileServer();
 
-        setTitle("P2P File Transfer - Dashboard (" + user.getUsername() + ")");
+        setTitle("P2P File Transfer - Dashboard (" + user.getUsername() + " - Port: " + port + ")");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
@@ -67,11 +70,16 @@ public class DashboardFrame extends JFrame {
         updateUserOnlineStatus(true);
     }
 
+    // Constructor with default port (for backward compatibility)
+    public DashboardFrame(User user) {
+        this(user, DEFAULT_PORT);
+    }
+
     private void initializeComponents() {
         welcomeLabel = new JLabel("Welcome, " + currentUser.getUsername() + "!");
         statusLabel = new JLabel("Ready to transfer files");
         peerIpField = new JTextField("127.0.0.1", 15);
-        peerPortField = new JTextField(String.valueOf(DEFAULT_PORT), 8);
+        peerPortField = new JTextField(String.valueOf(serverPort), 8);
         selectFileButton = new JButton("Select File");
         sendFileButton = new JButton("Send File");
         refreshLogsButton = new JButton("Refresh");
@@ -389,13 +397,13 @@ public class DashboardFrame extends JFrame {
 
     private void startFileServer() {
         try {
-            fileServer = new FileServer(DEFAULT_PORT, this);
+            fileServer = new FileServer(serverPort, this);
             executorService.submit(fileServer);
-            addLog("File server started on port " + DEFAULT_PORT);
-            updateStatus("Ready to receive files");
+            addLog("File server started on port " + serverPort);
+            updateStatus("Ready to receive files on port " + serverPort);
         } catch (Exception e) {
-            addLog("Failed to start file server: " + e.getMessage());
-            updateStatus("Server startup failed");
+            addLog("Failed to start file server on port " + serverPort + ": " + e.getMessage());
+            updateStatus("Server startup failed - try a different port");
         }
     }
 
@@ -441,7 +449,7 @@ public class DashboardFrame extends JFrame {
             currentUser.getUserId(),
             isOnline,
             "127.0.0.1",
-            DEFAULT_PORT
+            serverPort
         );
     }
 
